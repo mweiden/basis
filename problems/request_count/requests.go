@@ -2,7 +2,6 @@ package request_count
 
 import (
 	"sync"
-	"fmt"
 )
 
 type RequestMetrics struct {
@@ -41,7 +40,6 @@ func (r *RequestMetrics) Count() uint64 {
 	end := r.getTimestamp()
 	start := end - r.interval
 	var total uint64 = 0
-	fmt.Printf("%d - %d >> %v\n", start, end, r.timestampCounts)
 	for timestamp, count := range r.timestampCounts {
 		if timestamp > start && timestamp <= end {
 			total += count
