@@ -1,4 +1,4 @@
-package main
+package datastructures
 
 import (
 	"errors"
@@ -17,11 +17,11 @@ func (h *Heap) Insert(val int) {
 	h.ary = append(h.ary, val)
 	i := len(h.ary) - 1
 	for i > 0 {
-		parentInd := parent(i)
+		parentInd := HeapParent(i)
 		if h.ary[parentInd] <= h.ary[i] {
 			break
 		} else {
-			swap(h.ary, parentInd, i)
+			Swap(h.ary, parentInd, i)
 		}
 		i = parentInd
 	}
@@ -38,8 +38,8 @@ func (h *Heap) Pop() (error, int) {
 	i := 0
 	for i < len(h.ary)-1 {
 		minInd := i
-		l := left(i)
-		r := right(i)
+		l := HeapLeft(i)
+		r := HeapRight(i)
 		if l < len(h.ary) && h.ary[l] < h.ary[minInd] {
 			minInd = l
 		}
@@ -47,7 +47,7 @@ func (h *Heap) Pop() (error, int) {
 			minInd = r
 		}
 		if minInd != i {
-			swap(h.ary, minInd, i)
+			Swap(h.ary, minInd, i)
 			i = minInd
 		} else {
 			break
@@ -56,20 +56,20 @@ func (h *Heap) Pop() (error, int) {
 	return nil, min
 }
 
-func swap(ary []int, i int, j int) {
+func Swap(ary []int, i int, j int) {
 	iVal := ary[i]
 	ary[i] = ary[j]
 	ary[j] = iVal
 }
 
-func left(i int) int {
+func HeapLeft(i int) int {
 	return i*2 + 1
 }
 
-func right(i int) int {
+func HeapRight(i int) int {
 	return i*2 + 2
 }
 
-func parent(i int) int {
+func HeapParent(i int) int {
 	return (i-1) / 2
 }

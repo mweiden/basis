@@ -1,2 +1,3 @@
 test:
-	python -m unittest discover -s ./ -p 'test_*.py'
+	go test -v ./...
+	python -m unittest discover -s ./ -p '*_test.py'

@@ -2,6 +2,7 @@ package sorting
 
 import (
 	"image/color"
+	"github.com/basis/datastructures"
 )
 
 type InstrumentedHeap struct {
@@ -15,11 +16,11 @@ func (h *InstrumentedHeap) Insert(val int, max int) [][]color.RGBA {
 	i := len(h.ary) - 1
 	img = append(img, arrayToColors(h.ary, max))
 	for i > 0 {
-		parentInd := parent(i)
+		parentInd := datastructures.HeapParent(i)
 		if h.ary[parentInd] <= h.ary[i] {
 			break
 		} else {
-			swap(h.ary, parentInd, i)
+			datastructures.Swap(h.ary, parentInd, i)
 		}
 		i = parentInd
 		img = append(img, arrayToColors(h.ary, max))
@@ -30,7 +31,7 @@ func (h *InstrumentedHeap) Insert(val int, max int) [][]color.RGBA {
 func (h *InstrumentedHeap) Pop(max int) (error, int, [][]color.RGBA) {
 	var img [][]color.RGBA
 	if len(h.ary) == 0 {
-		return EOH, -1, img
+		return datastructures.EOH, -1, img
 	}
 	// pull from front, replace with last, then bubble down
 	min := h.ary[0]
@@ -40,8 +41,8 @@ func (h *InstrumentedHeap) Pop(max int) (error, int, [][]color.RGBA) {
 	for i < len(h.ary)-1 {
 		img = append(img, arrayToColors(h.ary, max))
 		minInd := i
-		l := left(i)
-		r := right(i)
+		l := datastructures.HeapLeft(i)
+		r := datastructures.HeapRight(i)
 		if l < len(h.ary) && h.ary[l] < h.ary[minInd] {
 			minInd = l
 		}
@@ -49,7 +50,7 @@ func (h *InstrumentedHeap) Pop(max int) (error, int, [][]color.RGBA) {
 			minInd = r
 		}
 		if minInd != i {
-			swap(h.ary, minInd, i)
+			datastructures.Swap(h.ary, minInd, i)
 			i = minInd
 		} else {
 			break

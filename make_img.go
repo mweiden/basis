@@ -5,6 +5,7 @@ import (
 	"image/png"
 	"math/rand"
 	"os"
+	"github.com/basis/sorting"
 )
 
 func main() {
