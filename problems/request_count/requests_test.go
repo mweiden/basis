@@ -13,7 +13,7 @@ func TestRequestMetrics(t *testing.T) {
 	}
 	metrics := RequestMetrics{
 		getTimestamp: getTimestamp,
-		interval: 5000,
+		interval:     5000,
 	}
 
 	metrics.Init()
@@ -38,7 +38,6 @@ func TestRequestMetrics(t *testing.T) {
 	if val != expected {
 		t.Errorf("%d != %d", val, expected)
 	}
-
 
 	timestamp = 14999
 	val = metrics.Count()
@@ -70,7 +69,7 @@ func TestRequestMetrics_garbageCollect(t *testing.T) {
 	}
 	metrics := RequestMetrics{
 		getTimestamp: getTimestamp,
-		interval: 5000,
+		interval:     5000,
 	}
 	metrics.Init()
 

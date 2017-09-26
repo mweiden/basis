@@ -21,9 +21,9 @@ func (a AlphabetOrdering) Validate() bool {
 }
 
 type customAlphabetSorter struct {
-	strings []string
+	strings    []string
 	runeIntMap map[rune]int
-	by      func(p1 string, p2 string) bool
+	by         func(p1 string, p2 string) bool
 }
 
 type By func(p1 string, p2 string) bool

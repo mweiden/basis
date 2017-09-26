@@ -71,5 +71,5 @@ func HeapRight(i int) int {
 }
 
 func HeapParent(i int) int {
-	return (i-1) / 2
+	return (i - 1) / 2
 }

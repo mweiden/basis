@@ -3,7 +3,7 @@ package sorting
 import "image/color"
 
 func BitonicSort(logn uint, a []int) [][]color.RGBA {
-	if len(a) != 1 << logn {
+	if len(a) != 1<<logn {
 		panic(1)
 	}
 
@@ -23,10 +23,10 @@ func kernel(a []int, p int, q int, max int) [][]color.RGBA {
 
 	for i := 0; i < len(a); i++ {
 		up := ((i >> uint(p)) & 2) == 0
-		if (i & d) == 0 && (a[i] > a[i | d]) == up {
+		if (i&d) == 0 && (a[i] > a[i|d]) == up {
 			t := a[i]
-			a[i] = a[i | d]
-			a[i | d] = t
+			a[i] = a[i|d]
+			a[i|d] = t
 		}
 		img = append(img, arrayToColors(a, max))
 	}

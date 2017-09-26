@@ -1,8 +1,8 @@
 package sorting
 
 import (
-	"image/color"
 	"github.com/basis/datastructures"
+	"image/color"
 )
 
 type InstrumentedHeap struct {

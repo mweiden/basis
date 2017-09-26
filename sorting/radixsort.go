@@ -13,7 +13,7 @@ func RadixSort(src []int) [][]color.RGBA {
 
 	for k := 31; k >= 0; k-- {
 		var tmp [][]int
-		for _, ary := range sortingStack{
+		for _, ary := range sortingStack {
 			zeros, ones := split(ary, uint(k))
 			if len(zeros) > 0 {
 				tmp = append(tmp, zeros)

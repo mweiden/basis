@@ -5,11 +5,11 @@ import (
 )
 
 type RequestMetrics struct {
-	getTimestamp func() uint64
-	interval uint64
-	maxSize uint64
+	getTimestamp    func() uint64
+	interval        uint64
+	maxSize         uint64
 	timestampCounts map[uint64]uint64
-	counterMutex *sync.Mutex
+	counterMutex    *sync.Mutex
 }
 
 func (r *RequestMetrics) Init() {

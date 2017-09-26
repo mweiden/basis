@@ -1,8 +1,8 @@
 package sorting
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestRadixSort(t *testing.T) {

@@ -7,10 +7,10 @@ var (
 )
 
 type Stack struct {
-	ary []int
+	ary []interface{}
 }
 
-func (s *Stack) Top() int {
+func (s *Stack) Top() interface{} {
 	return s.ary[len(s.ary)-1]
 }
 
@@ -18,11 +18,11 @@ func (s *Stack) Empty() bool {
 	return len(s.ary) == 0
 }
 
-func (s *Stack) Push(i int) {
+func (s *Stack) Push(i interface{}) {
 	s.ary = append(s.ary, i)
 }
 
-func (s *Stack) Pop() (error, int) {
+func (s *Stack) Pop() (error, interface{}) {
 	if s.Empty() {
 		return EOS, -1
 	} else {

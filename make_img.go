@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/basis/sorting"
 	"image"
 	"image/png"
 	"math/rand"
 	"os"
-	"github.com/basis/sorting"
 )
 
 func main() {
