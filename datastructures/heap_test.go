@@ -6,25 +6,29 @@ import (
 
 func TestHeap(t *testing.T) {
 	t.Parallel()
-	var h Heap
+	h := Heap{
+		Compare: func(a interface{}, b interface{}) int {
+			return a.(int) - b.(int)
+		},
+	}
 	h.Insert(3)
 	h.Insert(2)
 	h.Insert(1)
 	h.Insert(4)
 	type Result struct {
+		val interface{}
 		err error
-		val int
 	}
 	expected := []Result{
-		Result{nil, 1},
-		Result{nil, 2},
-		Result{nil, 3},
-		Result{nil, 4},
-		Result{EOH, -1},
+		Result{1, nil},
+		Result{2, nil},
+		Result{3, nil},
+		Result{4, nil},
+		Result{nil, EOH},
 	}
 
 	for _, e := range expected {
-		err, val := h.Pop()
+		val, err := h.Pop()
 		if e.err != err || e.val != val {
 			t.Errorf("Expected %v %d, got %v %d", e.err, e.val, err, val)
 		}

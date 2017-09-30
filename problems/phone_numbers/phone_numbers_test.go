@@ -1,8 +1,8 @@
 package phone_numbers
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestWith_PossibleWordsForPhoneNumber(t *testing.T) {

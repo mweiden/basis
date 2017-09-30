@@ -9,67 +9,80 @@ var (
 )
 
 type Heap struct {
-	ary []int
+	ary     []interface{}
+	Compare func(a interface{}, b interface{}) int
 }
 
-func (h *Heap) Insert(val int) {
+func (h *Heap) Insert(val interface{}) {
 	// append to end and then bubble up
 	h.ary = append(h.ary, val)
 	i := len(h.ary) - 1
 	for i > 0 {
-		parentInd := HeapParent(i)
-		if h.ary[parentInd] <= h.ary[i] {
+		parentInd := heapParent(i)
+		if h.Compare(h.ary[parentInd], h.ary[i]) <= 0 {
 			break
 		} else {
-			Swap(h.ary, parentInd, i)
+			swap(h.ary, parentInd, i)
 		}
 		i = parentInd
 	}
 }
 
-func (h *Heap) Pop() (error, int) {
+func (h *Heap) Pop() (interface{}, error) {
 	if len(h.ary) == 0 {
-		return EOH, -1
+		return nil, EOH
 	}
 	// pull from front, replace with last, then bubble down
-	min := h.ary[0]
+	root := h.ary[0]
 	h.ary[0] = h.ary[len(h.ary)-1]
 	h.ary = h.ary[:len(h.ary)-1]
 	i := 0
 	for i < len(h.ary)-1 {
-		minInd := i
-		l := HeapLeft(i)
-		r := HeapRight(i)
-		if l < len(h.ary) && h.ary[l] < h.ary[minInd] {
-			minInd = l
+		compareInd := i
+		l := heapLeft(i)
+		r := heapRight(i)
+		if l < len(h.ary) && h.Compare(h.ary[l], h.ary[compareInd]) < 0 {
+			compareInd = l
 		}
-		if r < len(h.ary) && h.ary[r] < h.ary[minInd] {
-			minInd = r
+		if r < len(h.ary) && h.Compare(h.ary[r], h.ary[compareInd]) < 0 {
+			compareInd = r
 		}
-		if minInd != i {
-			Swap(h.ary, minInd, i)
-			i = minInd
+		if compareInd != i {
+			swap(h.ary, compareInd, i)
+			i = compareInd
 		} else {
 			break
 		}
 	}
-	return nil, min
+	return root, nil
 }
 
-func Swap(ary []int, i int, j int) {
-	iVal := ary[i]
+func (h *Heap) Peek() (interface{}, error) {
+	if len(h.ary) == 0 {
+		return nil, EOH
+	} else {
+		return h.ary[0], nil
+	}
+}
+
+func (h *Heap) Size() int {
+	return len(h.ary)
+}
+
+func swap(ary []interface{}, i int, j int) {
+	ival := ary[i]
 	ary[i] = ary[j]
-	ary[j] = iVal
+	ary[j] = ival
 }
 
-func HeapLeft(i int) int {
+func heapLeft(i int) int {
 	return i*2 + 1
 }
 
-func HeapRight(i int) int {
+func heapRight(i int) int {
 	return i*2 + 2
 }
 
-func HeapParent(i int) int {
+func heapParent(i int) int {
 	return (i - 1) / 2
 }

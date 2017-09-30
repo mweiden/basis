@@ -16,11 +16,11 @@ func (h *InstrumentedHeap) Insert(val int, max int) [][]color.RGBA {
 	i := len(h.ary) - 1
 	img = append(img, arrayToColors(h.ary, max))
 	for i > 0 {
-		parentInd := datastructures.HeapParent(i)
+		parentInd := heapParent(i)
 		if h.ary[parentInd] <= h.ary[i] {
 			break
 		} else {
-			datastructures.Swap(h.ary, parentInd, i)
+			swap(h.ary, parentInd, i)
 		}
 		i = parentInd
 		img = append(img, arrayToColors(h.ary, max))
@@ -41,8 +41,8 @@ func (h *InstrumentedHeap) Pop(max int) (error, int, [][]color.RGBA) {
 	for i < len(h.ary)-1 {
 		img = append(img, arrayToColors(h.ary, max))
 		minInd := i
-		l := datastructures.HeapLeft(i)
-		r := datastructures.HeapRight(i)
+		l := heapLeft(i)
+		r := heapRight(i)
 		if l < len(h.ary) && h.ary[l] < h.ary[minInd] {
 			minInd = l
 		}
@@ -50,7 +50,7 @@ func (h *InstrumentedHeap) Pop(max int) (error, int, [][]color.RGBA) {
 			minInd = r
 		}
 		if minInd != i {
-			datastructures.Swap(h.ary, minInd, i)
+			swap(h.ary, minInd, i)
 			i = minInd
 		} else {
 			break
@@ -95,4 +95,22 @@ func HeapSort(src []int) [][]color.RGBA {
 	copy(src, sorted)
 
 	return img
+}
+
+func swap(ary []int, i int, j int) {
+	ival := ary[i]
+	ary[i] = ary[j]
+	ary[j] = ival
+}
+
+func heapLeft(i int) int {
+	return i*2 + 1
+}
+
+func heapRight(i int) int {
+	return i*2 + 2
+}
+
+func heapParent(i int) int {
+	return (i - 1) / 2
 }

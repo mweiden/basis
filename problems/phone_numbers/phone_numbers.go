@@ -40,7 +40,7 @@ type Dictionary struct {
 	words []string
 }
 
-func (d Dictionary) ToPhoneNumberMap() func (string) []string {
+func (d Dictionary) ToPhoneNumberMap() func(string) []string {
 	m := make(map[string][]string)
 	for _, w := range d.words {
 		key := ""
@@ -49,12 +49,12 @@ func (d Dictionary) ToPhoneNumberMap() func (string) []string {
 		}
 		m[key] = append(m[key], w)
 	}
-	return func (key string) []string {
+	return func(key string) []string {
 		return m[key]
 	}
 }
 
-type With func (intsStr string) []string
+type With func(intsStr string) []string
 
 func key(ints []int) string {
 	key := ""

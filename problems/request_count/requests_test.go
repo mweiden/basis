@@ -2,6 +2,7 @@ package request_count
 
 import (
 	"testing"
+	"sync"
 )
 
 func TestRequestMetrics(t *testing.T) {
@@ -61,6 +62,35 @@ func TestRequestMetrics(t *testing.T) {
 	}
 }
 
+func TestRequestMetrics_Inc(t *testing.T) {
+	t.Parallel()
+	var timestamp uint64 = 10000
+	getTimestamp := func() uint64 { return timestamp }
+	metrics := RequestMetrics{
+		getTimestamp: getTimestamp,
+		interval:     5000,
+	}
+	metrics.Init()
+
+	// should lock write path properly
+	var wg sync.WaitGroup
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			metrics.Inc(1)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	var expected uint64 = 50
+	val := metrics.Count()
+
+	if val != expected {
+		t.Errorf("%v != %v\n", val, expected)
+	}
+}
+
 func TestRequestMetrics_garbageCollect(t *testing.T) {
 	t.Parallel()
 	var timestamp uint64
@@ -72,16 +102,21 @@ func TestRequestMetrics_garbageCollect(t *testing.T) {
 		interval:     5000,
 	}
 	metrics.Init()
-
-	for i := 0; i < 50; i++ {
-		timestamp = 4960 + uint64(i)
+	for i := 0; i < 10; i++ {
+		timestamp = 10000 + uint64(i)
 		metrics.Inc(1)
 	}
-
-	timestamp = 10000
-	var expected uint64 = 40
-	val := metrics.garbageCollect()
-	if val != expected {
-		t.Errorf("%d != %d", val, expected)
+	for i := 0; i < 10; i++ {
+		timestamp = 15000 + uint64(i)
+		metrics.garbageCollect()
+		expected := 10 - i
+		heapSize := metrics.timestamps.Size()
+		mapSize := len(metrics.timestampCounts)
+		if heapSize != mapSize {
+			t.Errorf("iter=%d, %d != %d", i, heapSize, mapSize)
+		}
+		if heapSize != expected {
+			t.Errorf("iter=%d, %d != %d", i, expected, heapSize)
+		}
 	}
 }
