@@ -1,7 +1,6 @@
 package request_count
 
 import (
-	"github.com/basis/datastructures"
 	"sync"
 )
 
@@ -9,18 +8,13 @@ type RequestMetrics struct {
 	getTimestamp    func() uint64
 	interval        uint64
 	timestampCounts map[uint64]uint64
-	timestamps      *datastructures.Heap
+	timestamps      []uint64
 	counterMutex    sync.RWMutex
 }
 
 func (r *RequestMetrics) Init() {
 	r.counterMutex = sync.RWMutex{}
 	r.timestampCounts = make(map[uint64]uint64)
-	r.timestamps = &datastructures.Heap{
-		Compare: func(a interface{}, b interface{}) int {
-			return int(a.(uint64) - b.(uint64))
-		},
-	}
 }
 
 func (r *RequestMetrics) Inc(amount uint) {
@@ -31,7 +25,7 @@ func (r *RequestMetrics) Inc(amount uint) {
 		_, ok := r.timestampCounts[timestamp]
 		if !ok {
 			r.timestampCounts[timestamp] = 1
-			r.timestamps.Insert(timestamp)
+			r.timestamps = append(r.timestamps, timestamp)
 		} else {
 			r.timestampCounts[timestamp] += 1
 		}
@@ -59,12 +53,9 @@ func (r *RequestMetrics) Count() uint64 {
 }
 
 func (r *RequestMetrics) garbageCollect() {
-	end := r.getTimestamp()
-	start := end - r.interval
-	min, err := r.timestamps.Peek()
-	for err == nil && min.(uint64) < start {
-		delete(r.timestampCounts, min.(uint64))
-		r.timestamps.Pop()
-		min, err = r.timestamps.Peek()
+	start := r.getTimestamp() - r.interval
+	for len(r.timestamps) > 0 && r.timestamps[0] < start {
+		delete(r.timestampCounts, r.timestamps[0])
+		r.timestamps = r.timestamps[1:len(r.timestamps)]
 	}
 }

@@ -110,13 +110,13 @@ func TestRequestMetrics_garbageCollect(t *testing.T) {
 		timestamp = 15000 + uint64(i)
 		metrics.garbageCollect()
 		expected := 10 - i
-		heapSize := metrics.timestamps.Size()
+		arySize := len(metrics.timestamps)
 		mapSize := len(metrics.timestampCounts)
-		if heapSize != mapSize {
-			t.Errorf("iter=%d, %d != %d", i, heapSize, mapSize)
+		if arySize != mapSize {
+			t.Errorf("iter=%d, %d != %d", i, arySize, mapSize)
 		}
-		if heapSize != expected {
-			t.Errorf("iter=%d, %d != %d", i, expected, heapSize)
+		if arySize != expected {
+			t.Errorf("iter=%d, %d != %d", i, expected, arySize)
 		}
 	}
 }
