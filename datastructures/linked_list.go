@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-type Node struct {
-	next *Node
+type ListNode struct {
+	next *ListNode
 	val  int
 }
 
 type LinkedList struct {
-	start *Node
-	end   *Node
+	start *ListNode
+	end   *ListNode
 }
 
 func (ll *LinkedList) Init() {
@@ -20,7 +20,7 @@ func (ll *LinkedList) Init() {
 }
 
 func (ll *LinkedList) Prepend(val int) {
-	newStart := Node{nil, val}
+	newStart := ListNode{nil, val}
 	if ll.start != nil {
 		newStart.next = ll.start
 	}
@@ -28,7 +28,7 @@ func (ll *LinkedList) Prepend(val int) {
 }
 
 func (ll *LinkedList) Append(val int) {
-	newEnd := Node{nil, val}
+	newEnd := ListNode{nil, val}
 	if ll.start == nil {
 		ll.start = &newEnd
 	}
@@ -40,7 +40,7 @@ func (ll *LinkedList) Append(val int) {
 
 func (ll *LinkedList) Reverse() {
 	// reverse the oder of the list
-	var left *Node = nil
+	var left *ListNode = nil
 	right := ll.start
 
 	for right != nil {
@@ -57,7 +57,7 @@ func (ll *LinkedList) Reverse() {
 
 func (ll *LinkedList) ToString() string {
 	listString := ""
-	printOp := func(currentNode *Node) {
+	printOp := func(currentNode *ListNode) {
 		var pos string
 		if ll.start == currentNode {
 			pos = "s"
@@ -71,8 +71,8 @@ func (ll *LinkedList) ToString() string {
 	return listString
 }
 
-func (ll *LinkedList) Walk(op func(*Node)) {
-	var currentNode *Node = ll.start
+func (ll *LinkedList) Walk(op func(*ListNode)) {
+	var currentNode *ListNode = ll.start
 	for (ll.start == nil && ll.end == nil) || currentNode != nil {
 		op(currentNode)
 		currentNode = currentNode.next

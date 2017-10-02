@@ -37,7 +37,7 @@ func (r *RequestMetrics) Count() uint64 {
 	r.counterMutex.RLock()
 	end := r.getTimestamp()
 	var start uint64
-	if (r.interval > end) {
+	if r.interval > end {
 		start = 0
 	} else {
 		start = end - r.interval

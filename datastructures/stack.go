@@ -22,12 +22,12 @@ func (s *Stack) Push(i interface{}) {
 	s.ary = append(s.ary, i)
 }
 
-func (s *Stack) Pop() (error, interface{}) {
+func (s *Stack) Pop() (interface{}, error) {
 	if s.Empty() {
-		return EOS, -1
+		return nil, EOS
 	} else {
 		result := s.ary[len(s.ary)-1]
 		s.ary = s.ary[:len(s.ary)-1]
-		return nil, result
+		return result, nil
 	}
 }

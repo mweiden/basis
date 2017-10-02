@@ -9,80 +9,68 @@ var (
 )
 
 type Heap struct {
-	ary     []interface{}
+	tree    BinaryTree
 	Compare func(a interface{}, b interface{}) int
 }
 
 func (h *Heap) Insert(val interface{}) {
 	// append to end and then bubble up
-	h.ary = append(h.ary, val)
-	i := len(h.ary) - 1
+	h.tree.ary = append(h.tree.ary, val)
+	i := h.tree.Size() - 1
 	for i > 0 {
-		parentInd := heapParent(i)
-		if h.Compare(h.ary[parentInd], h.ary[i]) <= 0 {
+		parent, _ := h.tree.Parent(i)
+		child, _ := h.tree.GetNode(i)
+		if h.Compare(parent.Val, child.Val) <= 0 {
 			break
 		} else {
-			swap(h.ary, parentInd, i)
+			h.tree.Swap(parent.Id, i)
 		}
-		i = parentInd
+		i = parent.Id
 	}
 }
 
 func (h *Heap) Pop() (interface{}, error) {
-	if len(h.ary) == 0 {
+	if h.tree.Size() == 0 {
 		return nil, EOH
 	}
 	// pull from front, replace with last, then bubble down
-	root := h.ary[0]
-	h.ary[0] = h.ary[len(h.ary)-1]
-	h.ary = h.ary[:len(h.ary)-1]
-	i := 0
-	for i < len(h.ary)-1 {
-		compareInd := i
-		l := heapLeft(i)
-		r := heapRight(i)
-		if l < len(h.ary) && h.Compare(h.ary[l], h.ary[compareInd]) < 0 {
-			compareInd = l
+	root, _ := h.tree.GetNode(0)
+	leaf, _ := h.tree.GetNode(h.tree.Size() - 1)
+	leaf.Id = 0
+	h.tree.SetNode(leaf)
+	h.tree.ary = h.tree.ary[:h.tree.Size()-1]
+
+	testParentId := leaf.Id
+	for testParentId < h.tree.Size()-1 {
+		parentId := testParentId
+		parent, _ := h.tree.GetNode(parentId)
+		left, leftErr := h.tree.LeftChild(parentId)
+		right, rightErr := h.tree.RightChild(parentId)
+		if leftErr == nil && h.Compare(left.Val, parent.Val) < 0 {
+			parentId = left.Id
 		}
-		if r < len(h.ary) && h.Compare(h.ary[r], h.ary[compareInd]) < 0 {
-			compareInd = r
+		if rightErr == nil && h.Compare(right.Val, parent.Val) < 0 {
+			parentId = right.Id
 		}
-		if compareInd != i {
-			swap(h.ary, compareInd, i)
-			i = compareInd
+		if parentId != testParentId {
+			h.tree.Swap(parentId, testParentId)
+			testParentId = parentId
 		} else {
 			break
 		}
 	}
-	return root, nil
+	return root.Val, nil
 }
 
 func (h *Heap) Peek() (interface{}, error) {
-	if len(h.ary) == 0 {
+	if h.tree.Size() == 0 {
 		return nil, EOH
 	} else {
-		return h.ary[0], nil
+		node, _ := h.tree.GetNode(0)
+		return node.Val, nil
 	}
 }
 
 func (h *Heap) Size() int {
-	return len(h.ary)
-}
-
-func swap(ary []interface{}, i int, j int) {
-	ival := ary[i]
-	ary[i] = ary[j]
-	ary[j] = ival
-}
-
-func heapLeft(i int) int {
-	return i*2 + 1
-}
-
-func heapRight(i int) int {
-	return i*2 + 2
-}
-
-func heapParent(i int) int {
-	return (i - 1) / 2
+	return h.tree.Size()
 }

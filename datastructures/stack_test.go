@@ -12,14 +12,19 @@ func TestStack(t *testing.T) {
 
 	expected := []int{2, 1}
 	for _, i := range expected {
-		err, result := s.Pop()
+		result, err := s.Pop()
 		if result != i || err != nil {
 			t.Errorf("Expected (%v, %d), got (%v, %d)!", nil, i, err, result)
 		}
 	}
 
-	err, result := s.Pop()
-	if err != EOS || result != -1 {
-		t.Errorf("Expected (%v, %d), got (%v, %d)!", nil, -1, err, result)
+	result, err := s.Pop()
+	expectedErr := EOS
+	var expectedResult interface{} = nil
+	if expectedErr != err {
+		t.Errorf("%v != %v", expectedErr, err)
+	}
+	if expectedResult != result {
+		t.Errorf("%v != %v", expectedResult, result)
 	}
 }

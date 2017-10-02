@@ -1,8 +1,8 @@
 package request_count
 
 import (
-	"testing"
 	"sync"
+	"testing"
 )
 
 func TestRequestMetrics(t *testing.T) {
