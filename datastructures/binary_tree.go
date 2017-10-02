@@ -5,19 +5,17 @@ import (
 	"math"
 )
 
+
 var (
 	DNE = errors.New("Node does not exist!")
-)
-
-type Status int
-
-const (
-	EMPTY Status = 0
+	EMPTY = tombstone{}
 )
 
 type BinaryTree struct {
 	ary []interface{}
 }
+
+type tombstone struct {}
 
 type Node struct {
 	Id  int
