@@ -2,9 +2,9 @@ package anagrams
 
 import (
 	"fmt"
-	"strings"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 func Anagrams(corpus []string) map[string][]string {
@@ -50,7 +50,7 @@ func makeKey(word string) string {
 	// sort and return joined tokens
 	sort.Slice(
 		tokens,
-		func (i, j int) bool {
+		func(i, j int) bool {
 			return tokens[i][0] < tokens[j][0]
 		},
 	)

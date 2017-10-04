@@ -1,8 +1,8 @@
 package packet_muxer
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestNewPacketMuxer(t *testing.T) {
@@ -14,7 +14,7 @@ func TestNewPacketMuxer(t *testing.T) {
 
 	type Result struct {
 		packet Packet
-		err error
+		err    error
 	}
 
 	var results []Result

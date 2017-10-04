@@ -1,8 +1,8 @@
 package anagrams
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestAnagrams_makeKey(t *testing.T) {
@@ -17,9 +17,9 @@ func TestAnagrams_makeKey(t *testing.T) {
 func TestAnagrams(t *testing.T) {
 	t.Parallel()
 	expected := map[string][]string{
-		"act": []string{"cat", "tac"},
-		"dgo": []string{"dog"},
-		"eoprst": []string{"presto", "repost"},
+		"act":       []string{"cat", "tac"},
+		"dgo":       []string{"dog"},
+		"eoprst":    []string{"presto", "repost"},
 		"aefors2tw": []string{"softwares", "swears oft"},
 	}
 	corpus := []string{
