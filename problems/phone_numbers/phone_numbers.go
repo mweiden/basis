@@ -1,7 +1,7 @@
 package phone_numbers
 
 import (
-	"github.com/soundcloud/cd-tools-target/go/src/fmt"
+	"fmt"
 	"strconv"
 )
 

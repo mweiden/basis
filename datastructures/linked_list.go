@@ -14,9 +14,11 @@ type LinkedList struct {
 	end   *ListNode
 }
 
-func (ll *LinkedList) Init() {
+func NewLinkedList() LinkedList {
+	ll := LinkedList{}
 	ll.start = nil
 	ll.end = nil
+	return ll
 }
 
 func (ll *LinkedList) Prepend(val int) {

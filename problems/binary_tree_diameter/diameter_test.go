@@ -1,7 +1,7 @@
 package binary_tree_diameter
 
 import (
-	"github.com/basis/datastructures"
+	"github.com/mweiden/basis/datastructures"
 	"testing"
 )
 

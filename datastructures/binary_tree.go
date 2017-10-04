@@ -5,9 +5,8 @@ import (
 	"math"
 )
 
-
 var (
-	DNE = errors.New("Node does not exist!")
+	DNE   = errors.New("Node does not exist!")
 	EMPTY = tombstone{}
 )
 
@@ -15,7 +14,7 @@ type BinaryTree struct {
 	ary []interface{}
 }
 
-type tombstone struct {}
+type tombstone struct{}
 
 type Node struct {
 	Id  int
@@ -135,6 +134,12 @@ func (b *BinaryTree) LeftChild(i int) (Node, error) {
 func (b *BinaryTree) RightChild(i int) (Node, error) {
 	ind := i*2 + 2
 	return b.GetNode(ind)
+}
+
+func (b *BinaryTree) IsLeaf(i int) bool {
+	_, leftErr := b.LeftChild(i)
+	_, rightErr := b.RightChild(i)
+	return leftErr != nil && rightErr != nil
 }
 
 func (b *BinaryTree) Parent(i int) (Node, error) {

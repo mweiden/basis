@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/basis/sorting"
+	"github.com/mweiden/basis/sorting"
 	"image"
 	"image/png"
 	"math/rand"
@@ -17,7 +17,7 @@ func main() {
 
 	iters := len(imgData)
 
-	heightMult := 6
+	heightMult := 7
 	widthMult := 1
 
 	// Create an image

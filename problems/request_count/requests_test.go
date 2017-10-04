@@ -12,12 +12,7 @@ func TestRequestMetrics(t *testing.T) {
 	getTimestamp := func() uint64 {
 		return timestamp
 	}
-	metrics := RequestMetrics{
-		getTimestamp: getTimestamp,
-		interval:     5000,
-	}
-
-	metrics.Init()
+	metrics := NewRequestMetrics(5000, getTimestamp)
 	val := metrics.Count()
 	var expected uint64 = 0
 	if val != expected {
@@ -66,11 +61,7 @@ func TestRequestMetrics_Inc(t *testing.T) {
 	t.Parallel()
 	var timestamp uint64 = 10000
 	getTimestamp := func() uint64 { return timestamp }
-	metrics := RequestMetrics{
-		getTimestamp: getTimestamp,
-		interval:     5000,
-	}
-	metrics.Init()
+	metrics := NewRequestMetrics(5000, getTimestamp)
 
 	// should lock write path properly
 	var wg sync.WaitGroup
@@ -97,11 +88,7 @@ func TestRequestMetrics_garbageCollect(t *testing.T) {
 	getTimestamp := func() uint64 {
 		return timestamp
 	}
-	metrics := RequestMetrics{
-		getTimestamp: getTimestamp,
-		interval:     5000,
-	}
-	metrics.Init()
+	metrics := NewRequestMetrics(5000, getTimestamp)
 	for i := 0; i < 10; i++ {
 		timestamp = 10000 + uint64(i)
 		metrics.Inc(1)

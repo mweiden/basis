@@ -1,7 +1,7 @@
 package text_validator
 
 import (
-	"github.com/basis/datastructures"
+	"github.com/mweiden/basis/datastructures"
 )
 
 var (

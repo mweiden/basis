@@ -1,7 +1,7 @@
 package sorting
 
 import (
-	"github.com/basis/datastructures"
+	"github.com/mweiden/basis/datastructures"
 	"image/color"
 )
 

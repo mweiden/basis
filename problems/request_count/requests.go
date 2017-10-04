@@ -12,9 +12,13 @@ type RequestMetrics struct {
 	counterMutex    sync.RWMutex
 }
 
-func (r *RequestMetrics) Init() {
+func NewRequestMetrics(interval uint64, getTimestamp func() uint64) RequestMetrics {
+	r := RequestMetrics{}
 	r.counterMutex = sync.RWMutex{}
 	r.timestampCounts = make(map[uint64]uint64)
+	r.getTimestamp = getTimestamp
+	r.interval = interval
+	return r
 }
 
 func (r *RequestMetrics) Inc(amount uint) {

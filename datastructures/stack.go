@@ -10,6 +10,10 @@ type Stack struct {
 	ary []interface{}
 }
 
+func NewStack(ary []interface{}) Stack {
+	return Stack{ary}
+}
+
 func (s *Stack) Top() interface{} {
 	return s.ary[len(s.ary)-1]
 }

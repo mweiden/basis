@@ -20,12 +20,34 @@ func (h *Heap) Insert(val interface{}) {
 	for i > 0 {
 		parent, _ := h.tree.Parent(i)
 		child, _ := h.tree.GetNode(i)
-		if h.Compare(parent.Val, child.Val) <= 0 {
-			break
-		} else {
+		if h.Compare(parent.Val, child.Val) > 0 {
 			h.tree.Swap(parent.Id, i)
+		} else {
+			break
 		}
 		i = parent.Id
+	}
+}
+
+func (h *Heap) Heapify(i int) {
+	for i < h.tree.Size()-1 {
+		swapId := i
+		left, leftErr := h.tree.LeftChild(swapId)
+		right, rightErr := h.tree.RightChild(swapId)
+		swap, _ := h.tree.GetNode(swapId)
+		if leftErr == nil && h.Compare(left.Val, swap.Val) < 0 {
+			swapId = left.Id
+		}
+		swap, _ = h.tree.GetNode(swapId)
+		if rightErr == nil && h.Compare(right.Val, swap.Val) < 0 {
+			swapId = right.Id
+		}
+		if swapId != i {
+			h.tree.Swap(swapId, i)
+			i = swapId
+		} else {
+			break
+		}
 	}
 }
 
@@ -40,25 +62,7 @@ func (h *Heap) Pop() (interface{}, error) {
 	h.tree.SetNode(leaf)
 	h.tree.ary = h.tree.ary[:h.tree.Size()-1]
 
-	testParentId := leaf.Id
-	for testParentId < h.tree.Size()-1 {
-		parentId := testParentId
-		parent, _ := h.tree.GetNode(parentId)
-		left, leftErr := h.tree.LeftChild(parentId)
-		right, rightErr := h.tree.RightChild(parentId)
-		if leftErr == nil && h.Compare(left.Val, parent.Val) < 0 {
-			parentId = left.Id
-		}
-		if rightErr == nil && h.Compare(right.Val, parent.Val) < 0 {
-			parentId = right.Id
-		}
-		if parentId != testParentId {
-			h.tree.Swap(parentId, testParentId)
-			testParentId = parentId
-		} else {
-			break
-		}
-	}
+	h.Heapify(0)
 	return root.Val, nil
 }
 
