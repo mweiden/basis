@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"sort"
+	"strconv"
 )
 
 func Anagrams(corpus []string) map[string][]string {
@@ -38,7 +39,13 @@ func makeKey(word string) string {
 	// build key tokens
 	var tokens []string
 	for k, v := range countMap {
-		tokens = append(tokens, fmt.Sprintf("%c%d", k, v))
+		var countString string
+		if v == 1 {
+			countString = ""
+		} else {
+			countString = strconv.Itoa(v)
+		}
+		tokens = append(tokens, fmt.Sprintf("%c%s", k, countString))
 	}
 	// sort and return joined tokens
 	sort.Slice(

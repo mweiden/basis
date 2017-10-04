@@ -7,8 +7,8 @@ import (
 
 func TestAnagrams_makeKey(t *testing.T) {
 	t.Parallel()
-	expected := "a1m1t2"
-	result := makeKey("matt")
+	expected := "abde4himnor2t3w2"
+	result := makeKey("matthew robert weiden")
 	if result != expected {
 		t.Errorf("%v != %v", result, expected)
 	}
@@ -17,10 +17,10 @@ func TestAnagrams_makeKey(t *testing.T) {
 func TestAnagrams(t *testing.T) {
 	t.Parallel()
 	expected := map[string][]string{
-		"a1c1t1": []string{"cat", "tac"},
-		"d1g1o1": []string{"dog"},
-		"e1o1p1r1s1t1": []string{"presto", "repost"},
-		"a1e1f1o1r1s2t1w1": []string{"softwares", "swears oft"},
+		"act": []string{"cat", "tac"},
+		"dgo": []string{"dog"},
+		"eoprst": []string{"presto", "repost"},
+		"aefors2tw": []string{"softwares", "swears oft"},
 	}
 	corpus := []string{
 		"cat",
