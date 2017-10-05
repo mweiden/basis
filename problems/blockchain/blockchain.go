@@ -1,7 +1,7 @@
 package blockchain
 
 type Blockchain struct {
-	hashCash       HashCash
+	hashCash            HashCash
 	chain               []Block
 	currentTransactions []Transaction
 	getTimestamp        func() int64
@@ -9,7 +9,7 @@ type Blockchain struct {
 
 func NewBlockchain(getTimestamp func() int64) *Blockchain {
 	bc := Blockchain{
-		hashCash: HashCash{Difficulty: 2},
+		hashCash:     HashCash{Difficulty: 2},
 		getTimestamp: getTimestamp,
 	}
 	bc.NewBlock(0, "GENESIS")
@@ -70,4 +70,3 @@ func (b *Blockchain) ValidChain() bool {
 	}
 	return true
 }
-

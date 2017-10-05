@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/mweiden/basis/problems/blockchain"
+	"io"
 	"log"
 	"net/http"
-	"io"
 )
 
 var (
@@ -21,7 +21,7 @@ func main() {
 	api := blockchain.NewAPI(
 		blockchain.NewBlockchain(blockchain.UnixTime),
 		listen,
-		func (url string) io.ReadCloser {
+		func(url string) io.ReadCloser {
 			response, _ := http.Get(url)
 			return response.Body
 		},

@@ -2,11 +2,11 @@ package blockchain
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
-	"fmt"
-	"io"
 )
 
 type API struct {
@@ -22,13 +22,13 @@ func NewAPI(
 	blockchain *Blockchain,
 	nodeIdentifier string,
 	requestMethod func(string) io.ReadCloser,
-	) *API {
+) *API {
 	api := API{
 		blockchain:     blockchain,
 		actionc:        make(chan func()),
 		quitc:          make(chan struct{}),
 		nodeIdentifier: nodeIdentifier,
-		requestMethod: requestMethod,
+		requestMethod:  requestMethod,
 		nodeRegistry:   make(map[string]int64),
 	}
 	go api.loop()
@@ -210,14 +210,14 @@ func (api *API) handleNodeRegister(w http.ResponseWriter, r *http.Request) {
 
 // node register
 type resolveResponse struct {
-	Status    string `json:"status"`
-	Chain 	[]Block `json:"chain"`
+	Status string  `json:"status"`
+	Chain  []Block `json:"chain"`
 }
 
 func (api *API) handleNodeResolve(w http.ResponseWriter, r *http.Request) {
 	var (
 		resolveOk = make(chan resolveResponse)
-		errc       = make(chan error)
+		errc      = make(chan error)
 	)
 	api.actionc <- func() {
 		replaced := api.ResoveConflicts()
@@ -230,7 +230,7 @@ func (api *API) handleNodeResolve(w http.ResponseWriter, r *http.Request) {
 		}
 		resolveOk <- resolveResponse{
 			Status: status,
-			Chain: api.blockchain.Chain(),
+			Chain:  api.blockchain.Chain(),
 		}
 	}
 	select {
