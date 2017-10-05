@@ -49,11 +49,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// api
-	g.Add(func() error {
-		return api.Run(ctx)
-	}, func(error) {
-		cancel()
-	})
+	g.Add(
+		func() error { return api.Run(ctx) },
+		func(error) { cancel() },
+	)
 
 	// http server
 	mux := http.NewServeMux()
@@ -62,24 +61,16 @@ func main() {
 	ln, _ := net.Listen("tcp", listen)
 
 	g.Add(
-		func() error {
-			return http.Serve(ln, api)
-		},
-		func(error) {
-			ln.Close()
-		},
+		func() error { return http.Serve(ln, api) },
+		func(error) { ln.Close() },
 	)
 
 	// signal catcher
 	cancelChan := make(chan struct{})
 
 	g.Add(
-		func() error {
-			return interrupt(cancelChan)
-		},
-		func(error) {
-			close(cancelChan)
-		},
+		func() error { return interrupt(cancelChan) },
+		func(error) { close(cancelChan) },
 	)
 
 	// run
