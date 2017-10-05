@@ -1,13 +1,13 @@
 package blockchain
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"time"
-	"context"
 )
 
 type API struct {

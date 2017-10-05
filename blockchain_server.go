@@ -1,19 +1,19 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/mweiden/basis/problems/blockchain"
 	"github.com/oklog/oklog/pkg/group"
 	"io"
 	"log"
-	"net/http"
 	"net"
-	"context"
-	"os/signal"
+	"net/http"
 	"os"
+	"os/signal"
 	"syscall"
-	"errors"
 )
 
 var (
@@ -49,9 +49,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// api
-	g.Add(func () error {
+	g.Add(func() error {
 		return api.Run(ctx)
-	}, func (error) {
+	}, func(error) {
 		cancel()
 	})
 
@@ -61,20 +61,26 @@ func main() {
 	log.Printf("blockchain:web listening on %s", listen)
 	ln, _ := net.Listen("tcp", listen)
 
-	g.Add(func () error {
-		return http.Serve(ln, api)
-	}, func (error) {
-		ln.Close()
-	})
+	g.Add(
+		func() error {
+			return http.Serve(ln, api)
+		},
+		func(error) {
+			ln.Close()
+		},
+	)
 
 	// signal catcher
 	cancelChan := make(chan struct{})
 
-	g.Add(func () error {
-		return interrupt(cancelChan)
-	}, func (error) {
-		close(cancelChan)
-	})
+	g.Add(
+		func() error {
+			return interrupt(cancelChan)
+		},
+		func(error) {
+			close(cancelChan)
+		},
+	)
 
 	// run
 	g.Run()
