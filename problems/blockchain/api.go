@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"context"
 )
 
 type API struct {
@@ -26,20 +27,19 @@ func NewAPI(
 	api := API{
 		blockchain:     blockchain,
 		actionc:        make(chan func()),
-		quitc:          make(chan struct{}),
 		nodeIdentifier: nodeIdentifier,
 		requestMethod:  requestMethod,
 		nodeRegistry:   make(map[string]int64),
 	}
-	go api.loop()
 	return &api
 }
 
-func (api *API) loop() {
+func (api *API) Run(ctx context.Context) error {
 	for {
 		select {
-		case <-api.quitc:
-			return
+		case <-ctx.Done():
+			log.Println("Shutting down.")
+			return ctx.Err()
 		case f := <-api.actionc:
 			f()
 		}
