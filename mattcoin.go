@@ -14,10 +14,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
+	"math/rand"
 )
 
 var (
-	host = flag.String("host", "0.0.0.0", "Bind address for HTTP server")
+	host = flag.String("host", "localhost", "Bind address for HTTP server")
 	port = flag.Int("port", 5000, "Bind port for HTTP server")
 )
 
@@ -34,7 +36,11 @@ func interrupt(cancel <-chan struct{}) error {
 
 // main
 func main() {
+	log.SetOutput(os.Stdout)
+	flag.Parse()
 	listen := fmt.Sprintf("%s:%d", *host, *port)
+	log.SetPrefix(fmt.Sprintf("[%s] ", listen))
+	rand.Seed(int64(*port))
 
 	api := blockchain.NewAPI(
 		blockchain.NewBlockchain(blockchain.UnixTime),
@@ -48,9 +54,26 @@ func main() {
 	var g group.Group
 	ctx, cancel := context.WithCancel(context.Background())
 
+	cronBeat := make(chan bool)
+	go func() {
+		for {
+			// TODO: This is kind of a hack to fake different mining completions
+			// between instances of mattcoin
+			sleepTime := (10 + time.Duration(rand.Int() % 5)) * time.Second
+			time.Sleep(sleepTime)
+			cronBeat <- true
+		}
+	}()
+
 	// api
 	g.Add(
 		func() error { return api.Run(ctx) },
+		func(error) { cancel() },
+	)
+
+	// mining cron
+	g.Add(
+		func() error { return api.Cron(ctx, cronBeat) },
 		func(error) { cancel() },
 	)
 

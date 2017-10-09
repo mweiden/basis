@@ -38,10 +38,26 @@ func (api *API) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Shutting down.")
+			log.Println("Shutting API down.")
 			return ctx.Err()
 		case f := <-api.actionc:
 			f()
+		}
+	}
+}
+
+func (api *API) Cron(ctx context.Context, cronBeat chan bool) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-cronBeat:
+			mineResponse, _ := api.Mine()
+			bytes, _ := json.Marshal(mineResponse)
+			log.Println(string(bytes))
+			resolveResponse, _ := api.NodeResolve()
+			bytes, _ = json.Marshal(resolveResponse)
+			log.Println(string(bytes))
 		}
 	}
 }
@@ -98,7 +114,7 @@ func (api *API) handleNewTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 	select {
 	case response := <-createOk:
-		w.Header().Add("Content-type", "application/json")
+		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 		w.WriteHeader(http.StatusCreated)
 	case err := <-errc:
@@ -107,7 +123,7 @@ func (api *API) handleNewTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 // mine
-type mineResponse struct {
+type MineResponse struct {
 	Status       string        `json:"status"`
 	Index        uint          `json:"index"`
 	Transactions []Transaction `json:"transaction"`
@@ -116,20 +132,32 @@ type mineResponse struct {
 }
 
 func (api *API) handleMine(w http.ResponseWriter, r *http.Request) {
+	response, err := api.Mine()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (api *API) Mine() (MineResponse, error) {
 	var (
-		mineOk = make(chan mineResponse)
+		mineOk = make(chan MineResponse)
 		errc   = make(chan error)
 	)
 	api.actionc <- func() {
 		lastProof := api.blockchain.LastBlock().Proof
 		proof := api.blockchain.hashCash.ProofOfWork(lastProof)
 		api.blockchain.NewTransaction(
-			"0",
+			api.nodeIdentifier,
 			api.nodeIdentifier,
 			1,
 		)
 		block := api.blockchain.NewBlock(proof, nil)
-		mineOk <- mineResponse{
+		mineOk<-MineResponse{
 			Status:       "new block created",
 			Index:        block.Index,
 			Transactions: block.Transactions,
@@ -139,10 +167,9 @@ func (api *API) handleMine(w http.ResponseWriter, r *http.Request) {
 	}
 	select {
 	case response := <-mineOk:
-		w.Header().Add("Content-type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		return response, nil
 	case err := <-errc:
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		return MineResponse{}, err
 	}
 }
 
@@ -183,11 +210,20 @@ type nodeResponse struct {
 func (api *API) handleNodeRegister(w http.ResponseWriter, r *http.Request) {
 	var (
 		registryOk = make(chan nodeResponse)
+		noOpOk     = make(chan nodeResponse)
 		errc       = make(chan error)
 	)
 	api.actionc <- func() {
 		var request nodeRequest
 		json.NewDecoder(r.Body).Decode(&request)
+		if request.Address == api.nodeIdentifier {
+			noOpOk <- nodeResponse{
+				Address: request.Address,
+				Status:  "node cannot register itself, no operation",
+				Timestamp: UnixTime(),
+			}
+			return
+		}
 		_, ok := api.nodeRegistry[request.Address]
 		if !ok {
 			api.nodeRegistry[request.Address] = UnixTime()
@@ -200,27 +236,41 @@ func (api *API) handleNodeRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	select {
 	case response := <-registryOk:
-		w.Header().Add("Content-type", "application/json")
+		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 		w.WriteHeader(http.StatusCreated)
+	case response := <-noOpOk:
+		w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		w.WriteHeader(http.StatusOK)
 	case err := <-errc:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
 
 // node register
-type resolveResponse struct {
+type ResolveResponse struct {
 	Status string  `json:"status"`
 	Chain  []Block `json:"chain"`
 }
 
 func (api *API) handleNodeResolve(w http.ResponseWriter, r *http.Request) {
+	response, err := api.NodeResolve()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+}
+
+func (api *API) NodeResolve() (ResolveResponse, error) {
 	var (
-		resolveOk = make(chan resolveResponse)
+		resolveOk = make(chan ResolveResponse)
 		errc      = make(chan error)
 	)
 	api.actionc <- func() {
-		replaced := api.ResoveConflicts()
+		replaced := api.ResolveConflicts()
 
 		var status string
 		if replaced {
@@ -228,21 +278,20 @@ func (api *API) handleNodeResolve(w http.ResponseWriter, r *http.Request) {
 		} else {
 			status = "chain authoritative"
 		}
-		resolveOk <- resolveResponse{
+		resolveOk <- ResolveResponse{
 			Status: status,
 			Chain:  api.blockchain.Chain(),
 		}
 	}
 	select {
 	case response := <-resolveOk:
-		w.Header().Add("Content-type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		return response, nil
 	case err := <-errc:
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		return ResolveResponse{}, err
 	}
 }
 
-func (api *API) ResoveConflicts() bool {
+func (api *API) ResolveConflicts() bool {
 	var neighbours []string
 
 	for k, _ := range api.nodeRegistry {
