@@ -1,7 +1,6 @@
 package meeting_rooms
 
 import (
-	"fmt"
 	"sort"
 	"time"
 )
@@ -38,8 +37,6 @@ func NumRequiredMeetingRooms(schedules []MeetingSchedule) int {
 		diff := timeQueue[j].eventTime.Unix() - timeQueue[i].eventTime.Unix()
 		return diff > 0 || (diff == 0 && !timeQueue[i].isStart && timeQueue[j].isStart)
 	})
-
-	fmt.Printf(">> %v\n", timeQueue)
 
 	roomsRequired := 0
 	maxRooms := 0
