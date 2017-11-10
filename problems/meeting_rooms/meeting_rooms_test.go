@@ -20,6 +20,10 @@ func TestMeetingRooms(t *testing.T) {
 			start: time.Date(2017, 11, 10, 9, 30, 0, 0, time.UTC),
 			end:   time.Date(2017, 11, 10, 10, 30, 0, 0, time.UTC),
 		},
+		MeetingSchedule{
+			start: time.Date(2017, 11, 10, 9, 30, 0, 0, time.UTC),
+			end:   time.Date(2017, 11, 10, 11, 00, 0, 0, time.UTC),
+		},
 	}
 
 	expected := 2
