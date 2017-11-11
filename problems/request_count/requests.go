@@ -34,7 +34,7 @@ func (r *RequestMetrics) sanityCheckTimestamp(timestamp int64) {
 	}
 	lastInd := len(r.timestampCounts) - 1
 	// time should be monotonically increasing
-	if lastInd >= 0 && r.timestampAt(lastInd) > timestamp {
+	if lastInd >= 0 && r.timestampCounts[lastInd].timestamp > timestamp {
 		panic(1)
 	}
 }
@@ -50,7 +50,7 @@ func (r *RequestMetrics) Inc(amount uint) {
 		r.sanityCheckTimestamp(timestamp)
 		lastInd := len(r.timestampCounts) - 1
 		overlap := lastInd >= 0 &&
-			r.timestampAt(lastInd) == timestamp
+			r.timestampCounts[lastInd].timestamp == timestamp
 		if !overlap {
 			r.timestampCounts = append(
 				r.timestampCounts,
@@ -78,20 +78,20 @@ func (r *RequestMetrics) Count() uint64 {
 	// operations to determine the start of timestamps within ttl, so
 	// its worth it to do binary search
 	splitInd := int(math.Log2(float64(nTimestamps)))
-	if splitInd > 0 && start > r.timestampAt(splitInd) {
+	if splitInd > 0 && start > r.timestampCounts[splitInd].timestamp {
 		// pass by the old timestamps out of range, possible cases are:
 		// 1. if start is less than the first timestamp in storage, sum from the first timestamp
 		// 2. if the timestamp is found, sum from the next one
 		// 3. if a lesser timestamp is found, sum from the next one
 		i = binarySearch(start, len(r.timestampCounts), r.timestampAt) + 1
 	} else {
-		for i < nTimestamps && r.timestampAt(i) <= start {
+		for i < nTimestamps && r.timestampCounts[i].timestamp <= start {
 			i++
 		}
 	}
 	// sum timestamps that are in range
 	var total uint64
-	for i < nTimestamps && r.timestampAt(i) <= end {
+	for i < nTimestamps && r.timestampCounts[i].timestamp <= end {
 		total += r.timestampCounts[i].count
 		i++
 	}
