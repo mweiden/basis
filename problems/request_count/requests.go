@@ -1,6 +1,7 @@
 package request_count
 
 import (
+	"math"
 	"sync"
 )
 
@@ -33,7 +34,7 @@ func (r *RequestMetrics) sanityCheckTimestamp(timestamp int64) {
 	}
 	lastInd := len(r.timestampCounts) - 1
 	// time should be monotonically increasing
-	if lastInd >= 0 && r.timestampCounts[lastInd].timestamp > timestamp {
+	if lastInd >= 0 && r.timestampAt(lastInd) > timestamp {
 		panic(1)
 	}
 }
@@ -41,12 +42,15 @@ func (r *RequestMetrics) sanityCheckTimestamp(timestamp int64) {
 func (r *RequestMetrics) Inc(amount uint) {
 	if amount != 0 {
 		r.counterMutex.Lock()
-		r.garbageCollect()
+		// if storage is growing too large, garbage collect
+		if int64(len(r.timestampCounts)) >= r.interval {
+			r.garbageCollect()
+		}
 		timestamp := r.getTimestamp()
 		r.sanityCheckTimestamp(timestamp)
 		lastInd := len(r.timestampCounts) - 1
 		overlap := lastInd >= 0 &&
-			r.timestampCounts[lastInd].timestamp == timestamp
+			r.timestampAt(lastInd) == timestamp
 		if !overlap {
 			r.timestampCounts = append(
 				r.timestampCounts,
@@ -68,14 +72,26 @@ func (r *RequestMetrics) Count() uint64 {
 	} else {
 		start = end - r.interval
 	}
-	// pass by the old timestamps out of range, possible cases are:
-	// 1. if the next lowest timestamp is not in storage, sum from the first timestamp
-	// 2. if the timestamp is found, start from the next one
-	i := binarySearch(start, len(r.timestampCounts), r.timestampAt) + 1
+	nTimestamps := len(r.timestampCounts)
+	i := 0
+	// if start > timestampAt(splitInd), there are more than log2(n)
+	// operations to determine the start of timestamps within ttl, so
+	// its worth it to do binary search
+	splitInd := int(math.Log2(float64(nTimestamps)))
+	if splitInd > 0 && start > r.timestampAt(splitInd) {
+		// pass by the old timestamps out of range, possible cases are:
+		// 1. if start is less than the first timestamp in storage, sum from the first timestamp
+		// 2. if the timestamp is found, sum from the next one
+		// 3. if a lesser timestamp is found, sum from the next one
+		i = binarySearch(start, len(r.timestampCounts), r.timestampAt) + 1
+	} else {
+		for i < nTimestamps && r.timestampAt(i) <= start {
+			i++
+		}
+	}
 	// sum timestamps that are in range
 	var total uint64
-	nTimestamps := len(r.timestampCounts)
-	for i < nTimestamps && r.timestampCounts[i].timestamp <= end {
+	for i < nTimestamps && r.timestampAt(i) <= end {
 		total += r.timestampCounts[i].count
 		i++
 	}
@@ -87,9 +103,10 @@ func (r *RequestMetrics) garbageCollect() {
 	timestamp := r.getTimestamp()
 	r.sanityCheckTimestamp(timestamp)
 	start := timestamp - r.interval
-	// remove the timestamp counts before start, there are two cases:
-	// 1. if the next lowest timestamp is not in storage, slice from 0
+	// remove the timestamp counts before start, possible cases are:
+	// 1. if start is less than the first timestamp in storage, slice from the first timestamp
 	// 2. if the timestamp is found, slice from the next one
+	// 3. if a lesser timestamp is found, slice from the next one
 	i := binarySearch(start, len(r.timestampCounts), r.timestampAt) + 1
 	r.timestampCounts = r.timestampCounts[i:len(r.timestampCounts)]
 }
