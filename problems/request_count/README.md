@@ -14,8 +14,6 @@ The solution presented here stores timestamp counts in an ordered queue and garb
 The space complexity of the algorithm is `O(i)` where `i` is the number of potential timestamps in the interval.
 
 #### Time
-The time complexity of 
-
 * `Inc(amount uint)`
     * best case `O(1)`, when there is no garbage collection
     * average case `O(1/i * log2(n))` if calls to `Inc()` are on different timestamps
