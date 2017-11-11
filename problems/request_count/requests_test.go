@@ -8,13 +8,13 @@ import (
 func TestRequestMetrics(t *testing.T) {
 	t.Parallel()
 
-	var timestamp uint64
-	getTimestamp := func() uint64 {
+	var timestamp int64
+	getTimestamp := func() int64 {
 		return timestamp
 	}
 	metrics := NewRequestMetrics(5000, getTimestamp)
 	val := metrics.Count()
-	var expected uint64 = 0
+	var expected uint64
 	if val != expected {
 		t.Errorf("%d != %d", val, expected)
 	}
@@ -59,8 +59,8 @@ func TestRequestMetrics(t *testing.T) {
 
 func TestRequestMetrics_Inc(t *testing.T) {
 	t.Parallel()
-	var timestamp uint64 = 10000
-	getTimestamp := func() uint64 { return timestamp }
+	var timestamp int64 = 10000
+	getTimestamp := func() int64 { return timestamp }
 	metrics := NewRequestMetrics(5000, getTimestamp)
 
 	// should lock write path properly
@@ -84,26 +84,58 @@ func TestRequestMetrics_Inc(t *testing.T) {
 
 func TestRequestMetrics_garbageCollect(t *testing.T) {
 	t.Parallel()
-	var timestamp uint64
-	getTimestamp := func() uint64 {
+	var timestamp int64
+	getTimestamp := func() int64 {
 		return timestamp
 	}
 	metrics := NewRequestMetrics(5000, getTimestamp)
 	for i := 0; i < 10; i++ {
-		timestamp = 10000 + uint64(i)
+		timestamp = 10000 + int64(i)
 		metrics.Inc(1)
 	}
 	for i := 0; i < 10; i++ {
-		timestamp = 15000 + uint64(i)
+		timestamp = 15000 + int64(i)
 		metrics.garbageCollect()
-		expected := 10 - i
-		arySize := len(metrics.timestamps)
+		expected := 9 - i
 		mapSize := len(metrics.timestampCounts)
-		if arySize != mapSize {
-			t.Errorf("iter=%d, %d != %d", i, arySize, mapSize)
+		if mapSize != expected {
+			t.Errorf("iter=%d, %d != %d", i, mapSize, expected)
 		}
-		if arySize != expected {
-			t.Errorf("iter=%d, %d != %d", i, expected, arySize)
-		}
+	}
+}
+
+func TestBinarySearch(t *testing.T) {
+	t.Parallel()
+	ary := []int64{1, 2, 3, 5, 6, 7}
+	getVal := func(i int) int64 {
+		return ary[i]
+	}
+	expected := 2
+	result := binarySearch(4, len(ary), getVal)
+	if expected != result {
+		t.Errorf("%d != %d", expected, result)
+	}
+	expected = 3
+	result = binarySearch(5, len(ary), getVal)
+	if expected != result {
+		t.Errorf("%d != %d", expected, result)
+	}
+	ary = []int64{1}
+	getVal = func(i int) int64 {
+		return ary[i]
+	}
+	expected = 0
+	result = binarySearch(2, len(ary), getVal)
+	if expected != result {
+		t.Errorf("%d != %d", expected, result)
+	}
+	ary = []int64{}
+	getVal = func(i int) int64 {
+		return ary[i]
+	}
+	expected = -1
+	result = binarySearch(1, len(ary), getVal)
+	if expected != result {
+		t.Errorf("%d != %d", expected, result)
 	}
 }
