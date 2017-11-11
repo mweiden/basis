@@ -76,7 +76,7 @@ func (r *RequestMetrics) Count() uint64 {
 	i := 0
 	// if start > timestampAt(splitInd), there are more than log2(n)
 	// operations to determine the start of timestamps within ttl, so
-	// its worth it to do binary search
+	// it's worth it to do binary search
 	splitInd := int(math.Log2(float64(nTimestamps)))
 	if splitInd > 0 && start > r.timestampCounts[splitInd].timestamp {
 		// pass by the old timestamps out of range, possible cases are:
