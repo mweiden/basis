@@ -21,6 +21,6 @@ The space complexity of the algorithm is `O(i)` where `i` is the number of poten
     * worst case `O(log2(n))`, when there is garbage collection
 * `Count() uint64`
     * best case `O(log2(n))`
-    * average case is `O(n)` if `Count()` is always called before the last stored timestamp reaches its TTL
+    * average case is `O(n)` if `Count()` is always called before the last stored timestamp reaches its TTL and the probability that a timestamp in the queue is the start of the timestamps within the TTL is uniformly distributed
     * average case can be far less than `O(n)` if `Count()` is sometimes called after the last stored timestamp reaches its TTL, approaching `O(log2(n))` the longer `Count()` is not called
     * worst case is `O(n)`
