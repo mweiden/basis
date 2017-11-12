@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func main() {
+func make_img() {
 	//logn := uint(9)
 	//height := 1 << logn
 	height := 1500

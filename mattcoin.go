@@ -9,13 +9,13 @@ import (
 	"github.com/oklog/oklog/pkg/group"
 	"io"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"math/rand"
 )
 
 var (
@@ -59,7 +59,7 @@ func main() {
 		for {
 			// TODO: This is kind of a hack to fake different mining completions
 			// between instances of mattcoin
-			sleepTime := (10 + time.Duration(rand.Int() % 5)) * time.Second
+			sleepTime := (10 + time.Duration(rand.Int()%5)) * time.Second
 			time.Sleep(sleepTime)
 			cronBeat <- true
 		}

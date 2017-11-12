@@ -157,7 +157,7 @@ func (api *API) Mine() (MineResponse, error) {
 			1,
 		)
 		block := api.blockchain.NewBlock(proof, nil)
-		mineOk<-MineResponse{
+		mineOk <- MineResponse{
 			Status:       "new block created",
 			Index:        block.Index,
 			Transactions: block.Transactions,
@@ -218,8 +218,8 @@ func (api *API) handleNodeRegister(w http.ResponseWriter, r *http.Request) {
 		json.NewDecoder(r.Body).Decode(&request)
 		if request.Address == api.nodeIdentifier {
 			noOpOk <- nodeResponse{
-				Address: request.Address,
-				Status:  "node cannot register itself, no operation",
+				Address:   request.Address,
+				Status:    "node cannot register itself, no operation",
 				Timestamp: UnixTime(),
 			}
 			return
