@@ -117,7 +117,7 @@ func mapToUnitRange(o interface{}, replica int) float64 {
 		panic(1)
 	}
 	h.Write(bytes)
-	return float64(h.Sum32()) / float64(math.MaxUint32)
+	return float64(h.Sum32()%math.MaxUint32) / float64(math.MaxUint32)
 }
 
 func getBytes(key interface{}) ([]byte, error) {
