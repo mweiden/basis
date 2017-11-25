@@ -103,39 +103,3 @@ func TestRequestMetrics_garbageCollect(t *testing.T) {
 		}
 	}
 }
-
-func TestBinarySearch(t *testing.T) {
-	t.Parallel()
-	ary := []int64{1, 2, 3, 5, 6, 7}
-	getVal := func(i int) int64 {
-		return ary[i]
-	}
-	expected := 2
-	result := binarySearch(4, len(ary), getVal)
-	if expected != result {
-		t.Errorf("%d != %d", expected, result)
-	}
-	expected = 3
-	result = binarySearch(5, len(ary), getVal)
-	if expected != result {
-		t.Errorf("%d != %d", expected, result)
-	}
-	ary = []int64{1}
-	getVal = func(i int) int64 {
-		return ary[i]
-	}
-	expected = 0
-	result = binarySearch(2, len(ary), getVal)
-	if expected != result {
-		t.Errorf("%d != %d", expected, result)
-	}
-	ary = []int64{}
-	getVal = func(i int) int64 {
-		return ary[i]
-	}
-	expected = -1
-	result = binarySearch(1, len(ary), getVal)
-	if expected != result {
-		t.Errorf("%d != %d", expected, result)
-	}
-}

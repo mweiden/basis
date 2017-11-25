@@ -7,6 +7,8 @@ import (
 	"hash/fnv"
 	"math"
 	"sync"
+
+	"github.com/mweiden/basis/search"
 )
 
 type pointValuePair struct {
@@ -37,7 +39,11 @@ func (h *ConsistentHash) Remove(key interface{}) {
 }
 
 func (h *ConsistentHash) removePoint(point float64) {
-	i, found := h.binarySearch(point)
+	i, found := By(
+		func(i int, ary []pointValuePair) float64 {
+			return ary[i].point
+		},
+	).Search(h.circlePoints, point)
 	if found {
 		copy(h.circlePoints[i:], h.circlePoints[i+1:])
 		h.circlePoints = h.circlePoints[:len(h.circlePoints)-1]
@@ -54,7 +60,11 @@ func (h *ConsistentHash) Add(key interface{}, value interface{}) {
 }
 
 func (h *ConsistentHash) addPoint(point float64, value interface{}) {
-	i, found := h.binarySearch(point)
+	i, found := By(
+		func(i int, ary []pointValuePair) float64 {
+			return ary[i].point
+		},
+	).Search(h.circlePoints, point)
 	pair := pointValuePair{
 		point: point,
 		value: value,
@@ -72,7 +82,11 @@ func (h *ConsistentHash) addPoint(point float64, value interface{}) {
 func (h *ConsistentHash) Hash(key interface{}) interface{} {
 	h.mutex.RLock()
 	keyRangeVal := mapToUnitRange(key, -1)
-	i, _ := h.binarySearch(keyRangeVal)
+	i, _ := By(
+		func(i int, ary []pointValuePair) float64 {
+			return ary[i].point
+		},
+	).Search(h.circlePoints, keyRangeVal)
 	// wrap to the beginning of the circle if keyRangeValue is greater than the
 	// greatest stored value on the circle
 	if i > len(h.circlePoints)-1 {
@@ -81,26 +95,6 @@ func (h *ConsistentHash) Hash(key interface{}) interface{} {
 	result := h.circlePoints[i].value
 	h.mutex.RUnlock()
 	return result
-}
-
-// altered binary search
-// returns the index of the key or next greatest one if the key DNE
-func (h *ConsistentHash) binarySearch(point float64) (int, bool) {
-	length := len(h.circlePoints)
-	left := 0
-	right := length - 1
-	for left <= right {
-		split := (left + right) / 2
-		diff := h.circlePoints[split].point - point
-		if diff == 0 {
-			return split, true
-		} else if diff < 0 {
-			left = split + 1
-		} else {
-			right = split - 1
-		}
-	}
-	return left, false
 }
 
 func mapToUnitRange(o interface{}, replica int) float64 {
@@ -128,4 +122,28 @@ func getBytes(o interface{}) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// searching
+type By func(int, []pointValuePair) float64
+
+type pointSearcher struct {
+	slice []pointValuePair
+	by    By
+}
+
+func (h *pointSearcher) Len() int {
+	return len(h.slice)
+}
+
+func (h *pointSearcher) Compare(i int, point float64) float64 {
+	return h.slice[i].point - point
+}
+
+func (by By) Search(slice []pointValuePair, point float64) (int, bool) {
+	ps := &pointSearcher{
+		slice: slice,
+		by:    by,
+	}
+	return search.BinarySearch(ps, point)
 }

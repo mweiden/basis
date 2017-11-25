@@ -3,6 +3,8 @@ package request_count
 import (
 	"math"
 	"sync"
+
+	"github.com/mweiden/basis/search"
 )
 
 type RequestCount struct {
@@ -78,6 +80,7 @@ func (r *RequestMetrics) Count() uint64 {
 	}
 	nTimestamps := len(r.timestampCounts)
 	i := 0
+	found := false
 	// if start > timestampAt(splitInd), there are more than log2(n)
 	// operations to determine the start of timestamps within ttl, so
 	// it's worth it to do binary search
@@ -87,7 +90,14 @@ func (r *RequestMetrics) Count() uint64 {
 		// 1. if start is less than the first timestamp in storage, sum from the first timestamp
 		// 2. if the timestamp is found, sum from the next one
 		// 3. if a lesser timestamp is found, sum from the next one
-		i = binarySearch(start, len(r.timestampCounts), r.timestampAt) + 1
+		i, found = By(
+			func(i int, counts []RequestCount) int64 {
+				return counts[i].timestamp
+			},
+		).Search(r.timestampCounts, start)
+		if found {
+			i++
+		}
 	} else {
 		for i < nTimestamps && r.timestampCounts[i].timestamp <= start {
 			i++
@@ -112,33 +122,45 @@ func (r *RequestMetrics) garbageCollect() {
 	// 1. if start is less than the first timestamp in storage, slice from the first timestamp
 	// 2. if the timestamp is found, slice from the next one
 	// 3. if a lesser timestamp is found, slice from the next one
-	i := binarySearch(start, len(r.timestampCounts), r.timestampAt) + 1
+	i, found := By(
+		func(i int, counts []RequestCount) int64 {
+			return counts[i].timestamp
+		},
+	).Search(r.timestampCounts, start)
+	if found {
+		i++
+	}
 	r.timestampCounts = r.timestampCounts[i:len(r.timestampCounts)]
 	r.counterMutex.Unlock()
 }
 
-func (r *RequestMetrics) timestampAt(i int) int64 {
-	return r.timestampCounts[i].timestamp
+// searching
+type By func(int, []RequestCount) int64
+
+type timestampSearcher struct {
+	slice []RequestCount
+	by    By
 }
 
-// altered binary search
-// returns the index of the timestamp or next smallest one if the timestamp DNE
-func binarySearch(timestamp int64, length int, getVal func(int) int64) int {
-	if length == 0 {
+func (h *timestampSearcher) Len() int {
+	return len(h.slice)
+}
+
+func (h *timestampSearcher) Compare(i int, point interface{}) int {
+	diff := h.by(i, h.slice) - point.(int64)
+	if diff > 0 {
+		return 1
+	} else if diff < 0 {
 		return -1
+	} else {
+		return 0
 	}
-	left := 0
-	right := length - 1
-	for left <= right {
-		split := (left + right) / 2
-		diff := getVal(split) - timestamp
-		if diff == 0 {
-			return split
-		} else if diff < 0 {
-			left = split + 1
-		} else {
-			right = split - 1
-		}
+}
+
+func (by By) Search(slice []RequestCount, point int64) (int, bool) {
+	ps := &timestampSearcher{
+		slice: slice,
+		by:    by,
 	}
-	return left - 1
+	return search.BinarySearch(ps, point)
 }
