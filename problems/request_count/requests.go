@@ -142,12 +142,12 @@ type timestampSearcher struct {
 	by    By
 }
 
-func (h *timestampSearcher) Len() int {
-	return len(h.slice)
+func (s *timestampSearcher) Len() int {
+	return len(s.slice)
 }
 
-func (h *timestampSearcher) Compare(i int, point interface{}) int {
-	diff := h.by(i, h.slice) - point.(int64)
+func (s *timestampSearcher) Compare(i int, point interface{}) int {
+	diff := s.by(i, s.slice) - point.(int64)
 	if diff > 0 {
 		return 1
 	} else if diff < 0 {
