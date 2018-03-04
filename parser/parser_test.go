@@ -12,7 +12,7 @@ type Expect struct {
 
 func compare(t *testing.T, exp Expect, err error, result ParserResult) {
 	if !reflect.DeepEqual(err, exp.err) || !reflect.DeepEqual(result, exp.result) {
-		t.Errorf("Expected (%v, %d), got (%v, %d)", exp.err, exp.result, err, result)
+		t.Errorf("Expected (%v, %v), got (%v, %v)", exp.err, exp.result, err, result)
 	}
 }
 

@@ -23,5 +23,5 @@ func (hc *HashCash) ValidProof(lastProof uint, proof uint) bool {
 }
 
 func solutionKey(lastProof uint, proof uint) string {
-	return fmt.Sprintf(`namespace:%s:%s`, lastProof, proof)
+	return fmt.Sprintf(`namespace:%d:%d`, lastProof, proof)
 }

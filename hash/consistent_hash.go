@@ -136,8 +136,15 @@ func (h *pointSearcher) Len() int {
 	return len(h.slice)
 }
 
-func (h *pointSearcher) Compare(i int, point float64) float64 {
-	return h.slice[i].point - point
+func (h *pointSearcher) Compare(i int, point interface{}) int {
+	diff := h.slice[i].point - point.(float64)
+	if diff < 0 {
+		return -1
+	} else if diff > 0 {
+		return 1
+	} else {
+		return 0
+	}
 }
 
 func (by By) Search(slice []pointValuePair, point float64) (int, bool) {

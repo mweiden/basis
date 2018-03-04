@@ -2,7 +2,7 @@ build:
 	go build -v mattcoin.go
 
 test:
-	go test -v ./... && python -m unittest discover -s ./ -p '*_test.py'
+	go test -v ./...
 	@echo "Test result $0"
 
 test-only:

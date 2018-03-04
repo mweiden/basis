@@ -10,10 +10,6 @@ type Stack struct {
 	ary []interface{}
 }
 
-func NewStack(ary []interface{}) Stack {
-	return Stack{ary}
-}
-
 func (s *Stack) Top() interface{} {
 	return s.ary[len(s.ary)-1]
 }
@@ -29,9 +25,15 @@ func (s *Stack) Push(i interface{}) {
 func (s *Stack) Pop() (interface{}, error) {
 	if s.Empty() {
 		return nil, EOS
-	} else {
-		result := s.ary[len(s.ary)-1]
-		s.ary = s.ary[:len(s.ary)-1]
-		return result, nil
 	}
+	result := s.ary[len(s.ary)-1]
+	s.ary = s.ary[:len(s.ary)-1]
+	return result, nil
+}
+
+func (s *Stack) Peek() (interface{}, error) {
+	if s.Empty() {
+		return nil, EOS
+	}
+	return s.ary[len(s.ary)-1], nil
 }
