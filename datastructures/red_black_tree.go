@@ -9,10 +9,6 @@ const (
 	BLACK
 )
 
-type Comparable interface {
-	LessThan(interface{}) bool
-}
-
 type RBNode struct {
 	Key    Comparable
 	Value  interface{}
@@ -24,8 +20,8 @@ type RBNode struct {
 
 type SentinelKey struct{}
 
-func (k SentinelKey) LessThan(interface{}) bool {
-	return true
+func (k SentinelKey) Compare(interface{}) int {
+	return -1
 }
 
 var sentinelKey SentinelKey = SentinelKey{}
@@ -201,7 +197,7 @@ func isInternal(n *RBNode) bool {
 func (t *RedBlackTree) find(key Comparable) *RBNode {
 	n := t.root
 	for n != leafSentinel && n.Key != key {
-		if key.LessThan(n.Key) {
+		if key.Compare(n.Key) < 0 {
 			n = n.left
 		} else {
 			n = n.right
@@ -240,7 +236,7 @@ func (t *RedBlackTree) Insert(key Comparable, value interface{}) {
 }
 
 func (t *RedBlackTree) insertRecurse(root *RBNode, n *RBNode) {
-	if root != nil && n.Key.LessThan(root.Key) {
+	if root != nil && n.Key.Compare(root.Key) < 0 {
 		if root.left != leafSentinel {
 			t.insertRecurse(root.left, n)
 			return

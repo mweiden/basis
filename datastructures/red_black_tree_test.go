@@ -400,8 +400,8 @@ type NumNode struct {
 	i int
 }
 
-func (n NumNode) LessThan(other interface{}) bool {
-	return n.i < other.(NumNode).i
+func (n NumNode) Compare(other interface{}) int {
+	return n.i - other.(NumNode).i
 }
 
 func testNode() *RBNode {
